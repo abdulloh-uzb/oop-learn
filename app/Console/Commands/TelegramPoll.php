@@ -3,10 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Bot\Handler;
-use App\Bot\WeatherApi;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Client\Factory as HttpClient;
 
 class TelegramPoll extends Command
 {
@@ -18,7 +18,7 @@ class TelegramPoll extends Command
     protected string $offsetFile = 'telegram_offset.txt';
 
 
-    public function __construct(protected Handler $handler)
+    public function __construct(protected Handler $handler, private httpClient $http)
     {
         parent::__construct();
 
@@ -31,7 +31,7 @@ class TelegramPoll extends Command
         while (true) {
             $offset = $this->getOffset();
     
-            $response = Http::withoutVerifying()->get("{$this->apiUrl}/getUpdates", [
+            $response = $this->http->withoutVerifying()->get("{$this->apiUrl}/getUpdates", [
                 'timeout' => 30,
                 'offset' => $offset,
             ]);        
@@ -79,9 +79,6 @@ class TelegramPoll extends Command
             default:
                 return "❓ Unknown command. Type /help.";
         }
-
-
-
     }   
 
     private function sendMessage(int $chatId, string $text): void
