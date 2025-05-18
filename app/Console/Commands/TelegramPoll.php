@@ -47,7 +47,7 @@ class TelegramPoll extends Command
                 $chatId = $message['chat']['id'];
                 $text = $message['text'] ?? '';
                 
-                $reply = $this->handleCommand($text);
+                $reply = $this->handler->handle($text);
                 Log::info("Replying to chat ID {$chatId} with message: {$reply}");
                 $this->sendMessage($chatId, $reply);
     
@@ -58,28 +58,6 @@ class TelegramPoll extends Command
         }
     
     }
-
-    private function handleCommand(string $text): string
-    {
-        $text = strtolower(trim($text));
-        $parts = explode(' ', $text, 2);
-        $command = $parts[0];
-        $argument = $parts[1] ?? '';
-        
-        switch ($command) {
-            case '/start':
-                return "👋 Welcome to the bot!";
-                break;
-            
-            case '/help':
-                return "Available commands:\n/start\n/weather {city}";
-
-            case '/weather':
-                return $this->handler->handle($argument); 
-            default:
-                return "❓ Unknown command. Type /help.";
-        }
-    }   
 
     private function sendMessage(int $chatId, string $text): void
     {
